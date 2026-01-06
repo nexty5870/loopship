@@ -25,7 +25,7 @@
         "exports greet function",
         "greet('World') returns 'Hello, World!'"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "3",

@@ -11,3 +11,8 @@ Started: 2026-01-06
 - Created package.json with Node.js test runner setup
 - Using ES modules (type: module)
 - Test script uses Node's built-in --test flag
+
+## Iteration 2 - Story 2: Create hello module
+- Created src/hello.js with greet(name) function
+- Using ES module exports
+- Simple string template for greeting
