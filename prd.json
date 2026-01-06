@@ -1,0 +1,43 @@
+{
+  "project": "loopship-test",
+  "branchName": "feat/hello-world",
+  "description": "A simple test to verify Ralph loop works",
+  "stories": [
+    {
+      "id": "1",
+      "title": "Create package.json",
+      "description": "Initialize a Node.js project with package.json",
+      "priority": 1,
+      "acceptance": [
+        "package.json exists",
+        "name is 'loopship-test'",
+        "has a 'test' script"
+      ],
+      "passes": false
+    },
+    {
+      "id": "2", 
+      "title": "Create hello module",
+      "description": "Create src/hello.js that exports a greet(name) function returning 'Hello, {name}!'",
+      "priority": 2,
+      "acceptance": [
+        "src/hello.js exists",
+        "exports greet function",
+        "greet('World') returns 'Hello, World!'"
+      ],
+      "passes": false
+    },
+    {
+      "id": "3",
+      "title": "Add tests",
+      "description": "Create tests for the hello module using Node's built-in test runner",
+      "priority": 3,
+      "acceptance": [
+        "test/hello.test.js exists",
+        "npm test passes",
+        "tests cover greet function"
+      ],
+      "passes": false
+    }
+  ]
+}
