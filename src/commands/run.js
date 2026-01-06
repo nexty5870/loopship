@@ -72,7 +72,13 @@ export async function run(options) {
   console.log("📋 Stories:");
   for (const story of prd.stories) {
     const status = story.passes ? "✅" : "⏳";
-    console.log(`   ${status} ${story.id}. ${story.title}`);
+    const browserIcon = story.requiresBrowser ? " 🌐" : "";
+    console.log(`   ${status} ${story.id}. ${story.title}${browserIcon}`);
+  }
+  
+  const browserCount = prd.stories.filter(s => s.requiresBrowser && !s.passes).length;
+  if (browserCount > 0) {
+    console.log(`\n   🌐 = requires browser verification (${browserCount} stories)`);
   }
   console.log("");
 
@@ -127,15 +133,22 @@ For complex reasoning or architecture decisions, handle yourself.
 `
       : "";
 
-  const browserSection = browser
+  const browserStories = prd.stories.filter(s => s.requiresBrowser && !s.passes);
+  const browserSection = browser && browserStories.length > 0
     ? `
-## Browser Verification
+## Browser Verification Required
 
-For UI-related stories, use dev-browser to verify:
-1. Load the skill: "Load the dev-browser skill"
-2. Navigate to the relevant page
-3. Take a screenshot to verify the UI matches requirements
-4. Only mark the story as passing after visual confirmation
+The following stories require visual verification with dev-browser:
+${browserStories.map(s => `- Story ${s.id}: "${s.title}" → verify at ${s.verifyUrl || '/'}`).join('\n')}
+
+For these stories, you MUST:
+1. Load the dev-browser skill: "Load the dev-browser skill"
+2. Navigate to the verifyUrl specified in the story
+3. Take a screenshot
+4. Verify the UI matches the acceptance criteria
+5. Only mark as passing after visual confirmation
+
+Do NOT mark a requiresBrowser story as passing without a screenshot verification.
 `
     : "";
 
@@ -172,7 +185,14 @@ You are an autonomous coding agent running in a loop. Each iteration:
 
 1. **Read prd.json** - Find the next story where \`passes\` is not \`true\`
 2. **Implement the story** - Write the code needed
-3. **Run verification** - \`npm run typecheck\` and \`npm test\` (if available)
+3. **Run verification:**
+   - Run \`npm run typecheck\` and \`npm test\` (if available)
+   - If story has \`requiresBrowser: true\`:
+     a. Load the dev-browser skill
+     b. Navigate to the \`verifyUrl\` specified in the story
+     c. Take a screenshot
+     d. Verify UI matches acceptance criteria
+     e. Only proceed if visual check passes
 4. **If passing:**
    - Commit with message: "feat: [story title]"
    - Update prd.json: set \`passes: true\` for this story
@@ -187,4 +207,5 @@ You are an autonomous coding agent running in a loop. Each iteration:
 - Small, focused commits
 - If stuck for 3 attempts, mark story as blocked and move on
 - Update progress.txt with patterns you discover
+- ALWAYS verify UI stories with dev-browser before marking as done
 `;

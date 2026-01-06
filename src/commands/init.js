@@ -76,11 +76,37 @@ ${generateTasksPrompt}
       "description": "What to implement",
       "priority": 1,
       "acceptance": ["Criteria 1", "Criteria 2"],
+      "requiresBrowser": false,
+      "verifyUrl": null,
       "passes": false
     }
   ]
 }
 \`\`\`
+
+## Browser Verification
+
+For stories that involve UI changes, set:
+- \`requiresBrowser: true\`
+- \`verifyUrl: "/path/to/verify"\` (the URL path to check)
+
+The dev-browser skill will be used to:
+1. Navigate to the verifyUrl
+2. Take a screenshot
+3. Verify the UI matches acceptance criteria
+4. Only mark as passing after visual confirmation
+
+Examples of stories requiring browser:
+- UI component changes
+- Page layouts
+- Visual styling
+- User flows
+
+Examples NOT requiring browser:
+- API endpoints
+- Database changes
+- Business logic
+- CLI tools
 `;
 
   // Save the prompt for manual use or AI piping
