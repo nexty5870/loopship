@@ -1,0 +1,14 @@
+{
+  "name": "loopship-test",
+  "version": "1.0.0",
+  "description": "Test project for LoopShip Ralph loop",
+  "main": "src/hello.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "typecheck": "echo 'No TypeScript configured'"
+  },
+  "keywords": ["loopship", "ralph", "ai-coding"],
+  "author": "LoopShip",
+  "license": "MIT"
+}
