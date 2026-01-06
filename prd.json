@@ -37,7 +37,7 @@
         "npm test passes",
         "tests cover greet function"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

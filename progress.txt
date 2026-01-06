@@ -16,3 +16,11 @@ Started: 2026-01-06
 - Created src/hello.js with greet(name) function
 - Using ES module exports
 - Simple string template for greeting
+
+## Iteration 3 - Story 3: Add tests
+- Created test/hello.test.js using Node's built-in test runner
+- 3 test cases covering normal use and edge cases
+- All tests passing ✅
+
+## Loop Complete
+All 3 stories implemented and verified.
