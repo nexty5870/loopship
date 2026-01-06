@@ -1,14 +1,19 @@
 {
-  "name": "loopship-test",
-  "version": "1.0.0",
-  "description": "Test project for LoopShip Ralph loop",
-  "main": "src/hello.js",
+  "name": "loopship",
+  "version": "0.1.0",
+  "description": "Autonomous AI coding loop with multi-model orchestration",
   "type": "module",
-  "scripts": {
-    "test": "node --test test/*.test.js",
-    "typecheck": "echo 'No TypeScript configured'"
+  "bin": {
+    "loopship": "./src/cli.js"
   },
-  "keywords": ["loopship", "ralph", "ai-coding"],
-  "author": "LoopShip",
-  "license": "MIT"
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": ["ai", "coding", "automation", "ralph", "orchestration"],
+  "author": "Quentin Daems (@ShvZFR)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }
