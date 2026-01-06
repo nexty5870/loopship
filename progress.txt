@@ -6,3 +6,8 @@ Started: 2026-01-06
 ## Learnings
 
 (Ralph will append patterns here)
+
+## Iteration 1 - Story 1: Create package.json
+- Created package.json with Node.js test runner setup
+- Using ES modules (type: module)
+- Test script uses Node's built-in --test flag

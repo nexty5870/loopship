@@ -13,10 +13,10 @@
         "name is 'loopship-test'",
         "has a 'test' script"
       ],
-      "passes": false
+      "passes": true
     },
     {
-      "id": "2", 
+      "id": "2",
       "title": "Create hello module",
       "description": "Create src/hello.js that exports a greet(name) function returning 'Hello, {name}!'",
       "priority": 2,
