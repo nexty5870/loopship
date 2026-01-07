@@ -46,3 +46,13 @@ Goal: Premium dark UI for LoopShip loop monitoring
 - Mock output data in src/data/mockOutput.js with realistic agent log messages
 - Clear button in header resets output via state lift to App.jsx
 - Screenshot verified: monospace log visible with colored syntax highlighting, all message types displayed correctly
+
+### Story 5: Control bar with Start/Stop buttons
+- ControlBar component with status indicator on left, controls on right
+- Status shows Idle/Running/Complete with appropriate colors (white/50, amber-500, green-500)
+- Running status includes animated pulse dot and story count (e.g., "Running Story 3/8")
+- Start button amber accent when idle, disabled when complete
+- Stop button replaces Start when running, styled with red-400
+- Keyboard shortcut Cmd+Enter handled via useEffect, hint shown as "⌘↵"
+- Clean button styling: subtle hover states with bg color change, not chunky
+- Screenshot verified: control bar at top with Idle status and amber Start button with keyboard hint
