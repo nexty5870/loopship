@@ -1,6 +1,21 @@
 import { useState } from 'react'
 
-function Sidebar({ isOpen, onToggle }) {
+function ConnectionIndicator({ connected }) {
+  return (
+    <div className="flex items-center gap-2 px-5 py-3 border-t border-white/10">
+      <span
+        className={`w-2 h-2 rounded-full ${
+          connected ? 'bg-green-500' : 'bg-zinc-500'
+        }`}
+      />
+      <span className="text-xs text-white/50">
+        {connected ? 'Connected' : 'Disconnected'}
+      </span>
+    </div>
+  )
+}
+
+function Sidebar({ isOpen, onToggle, connected }) {
   return (
     <>
       {/* Mobile overlay */}
@@ -47,17 +62,20 @@ function Sidebar({ isOpen, onToggle }) {
             </li>
           </ul>
         </nav>
+
+        {/* Connection status */}
+        <ConnectionIndicator connected={connected} />
       </aside>
     </>
   )
 }
 
-function Layout({ children }) {
+function Layout({ children, connected = false }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="h-full flex bg-background">
-      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
+      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} connected={connected} />
 
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0">

@@ -1,34 +1,47 @@
-import { useState } from 'react'
 import Layout from './components/Layout'
 import ControlBar from './components/ControlBar'
 import StoryList from './components/StoryList'
 import OutputPanel from './components/OutputPanel'
+import { useLoopSocket } from './hooks/useLoopSocket'
 import { mockOutput } from './data/mockOutput'
 import { mockStories } from './data/mockStories'
 
 function App() {
-  const [outputLines, setOutputLines] = useState(mockOutput)
-  const [loopStatus, setLoopStatus] = useState('idle') // idle, running, complete
+  // WebSocket connection for live updates
+  const {
+    connected,
+    stories: liveStories,
+    output: liveOutput,
+    status: liveStatus,
+    startLoop,
+    stopLoop,
+    clearOutput
+  } = useLoopSocket()
 
-  // Calculate current story from mock data
-  const runningIndex = mockStories.findIndex((s) => s.status === 'running')
+  // Use live data when connected, fall back to mock data otherwise
+  const stories = liveStories.length > 0 ? liveStories : mockStories
+  const outputLines = liveOutput.length > 0 ? liveOutput : mockOutput
+  const loopStatus = connected ? liveStatus : 'idle'
+
+  // Calculate current story
+  const runningIndex = stories.findIndex((s) => s.status === 'running')
   const currentStory = runningIndex >= 0 ? runningIndex + 1 : 1
-  const totalStories = mockStories.length
+  const totalStories = stories.length
 
   const handleClearOutput = () => {
-    setOutputLines([])
+    clearOutput()
   }
 
   const handleStart = () => {
-    setLoopStatus('running')
+    startLoop()
   }
 
   const handleStop = () => {
-    setLoopStatus('idle')
+    stopLoop()
   }
 
   return (
-    <Layout>
+    <Layout connected={connected}>
       <ControlBar
         status={loopStatus}
         currentStory={currentStory}

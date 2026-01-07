@@ -56,3 +56,15 @@ Goal: Premium dark UI for LoopShip loop monitoring
 - Keyboard shortcut Cmd+Enter handled via useEffect, hint shown as "⌘↵"
 - Clean button styling: subtle hover states with bg color change, not chunky
 - Screenshot verified: control bar at top with Idle status and amber Start button with keyboard hint
+
+### Story 6: WebSocket client for live updates
+- Created useLoopSocket hook in src/hooks/useLoopSocket.js
+- Manages WebSocket connection to ws://localhost:3099 with exponential backoff reconnection
+- Initial retry delay: 1s, max delay: 30s, multiplier: 2x
+- Handles all event types: story_start, story_end, output, loop_complete, error, stories, status
+- Exposes: connected, stories, output, status, startLoop, stopLoop, clearOutput, send
+- All message handlers defined inside useEffect to avoid ESLint immutability warnings
+- Falls back to mock data when WebSocket not connected
+- Added ConnectionIndicator component in Layout.jsx showing green/zinc dot with text
+- Connection indicator placed at bottom of sidebar with subtle border-t separator
+- App.jsx integrates hook and passes connected prop to Layout
