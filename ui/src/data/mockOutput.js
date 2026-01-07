@@ -1,0 +1,30 @@
+// Mock output data for testing OutputPanel component
+// Simulates agent log output with various message types
+
+export const mockOutput = [
+  { id: 1, type: 'info', text: '> Starting Ralph loop...' },
+  { id: 2, type: 'info', text: '> Loading configuration from ./ralph.config.js' },
+  { id: 3, type: 'success', text: '✓ Configuration loaded successfully' },
+  { id: 4, type: 'info', text: '> Analyzing PRD: loopship-ui' },
+  { id: 5, type: 'file', text: '  Reading src/components/Layout.jsx' },
+  { id: 6, type: 'file', text: '  Reading src/components/StoryList.jsx' },
+  { id: 7, type: 'success', text: '✓ Found 5 stories to process' },
+  { id: 8, type: 'info', text: '' },
+  { id: 9, type: 'info', text: '> Processing story #4: Output panel with monospace log' },
+  { id: 10, type: 'file', text: '  Creating src/components/OutputPanel.jsx' },
+  { id: 11, type: 'file', text: '  Creating src/data/mockOutput.js' },
+  { id: 12, type: 'info', text: '> Running typecheck...' },
+  { id: 13, type: 'success', text: '✓ TypeScript: No errors found' },
+  { id: 14, type: 'info', text: '> Taking screenshot for visual verification' },
+  { id: 15, type: 'file', text: '  Saving screenshot to story-4.png' },
+  { id: 16, type: 'success', text: '✓ Screenshot captured' },
+  { id: 17, type: 'info', text: '' },
+  { id: 18, type: 'error', text: '✗ Error: Component test failed' },
+  { id: 19, type: 'error', text: '  Expected: auto-scroll enabled' },
+  { id: 20, type: 'error', text: '  Received: auto-scroll disabled' },
+  { id: 21, type: 'info', text: '' },
+  { id: 22, type: 'info', text: '> Retrying with fix applied...' },
+  { id: 23, type: 'file', text: '  Modifying src/components/OutputPanel.jsx' },
+  { id: 24, type: 'success', text: '✓ All acceptance criteria passed' },
+  { id: 25, type: 'success', text: '✓ Story #4 complete' },
+]

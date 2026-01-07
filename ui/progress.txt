@@ -36,3 +36,13 @@ Goal: Premium dark UI for LoopShip loop monitoring
 - Mock data in src/data/mockStories.js with 5 stories in various states
 - Clean list style with hover:bg-white/5 for subtle interactivity
 - Screenshot verified: all status dots visible with correct colors, passed stories dimmed
+
+### Story 4: Output panel with monospace log
+- Created OutputPanel component with dark surface background and subtle border
+- Used Geist Mono font (font-mono class) for all log text
+- Auto-scroll implemented with useEffect that scrolls to bottom when lines change
+- Smart scroll detection: if user scrolls up, auto-scroll pauses; resumes when at bottom
+- Syntax highlighting via line types: green-400 for success, red-400 for errors, cyan-400 for file paths
+- Mock output data in src/data/mockOutput.js with realistic agent log messages
+- Clear button in header resets output via state lift to App.jsx
+- Screenshot verified: monospace log visible with colored syntax highlighting, all message types displayed correctly

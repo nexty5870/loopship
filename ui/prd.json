@@ -66,7 +66,7 @@
       ],
       "requiresBrowser": true,
       "verifyUrl": "http://localhost:5173",
-      "passes": false
+      "passes": true
     },
     {
       "id": "5",
