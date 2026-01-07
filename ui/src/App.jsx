@@ -1,7 +1,9 @@
+import { useState, useEffect, useRef } from 'react'
 import Layout from './components/Layout'
 import ControlBar from './components/ControlBar'
 import StoryList from './components/StoryList'
 import OutputPanel from './components/OutputPanel'
+import ProgressSummary from './components/ProgressSummary'
 import { useLoopSocket } from './hooks/useLoopSocket'
 import { mockOutput } from './data/mockOutput'
 import { mockStories } from './data/mockStories'
@@ -18,10 +20,24 @@ function App() {
     clearOutput
   } = useLoopSocket()
 
+  // Track when the loop started for elapsed time calculation
+  const [loopStartTime, setLoopStartTime] = useState(null)
+  const prevStatus = useRef(null)
+
   // Use live data when connected, fall back to mock data otherwise
   const stories = liveStories.length > 0 ? liveStories : mockStories
   const outputLines = liveOutput.length > 0 ? liveOutput : mockOutput
   const loopStatus = connected ? liveStatus : 'idle'
+
+  // Track loop start time when status changes to running
+  useEffect(() => {
+    if (loopStatus === 'running' && prevStatus.current !== 'running') {
+      setLoopStartTime(Date.now())
+    } else if (loopStatus === 'idle' && prevStatus.current !== 'idle') {
+      setLoopStartTime(null)
+    }
+    prevStatus.current = loopStatus
+  }, [loopStatus])
 
   // Calculate current story
   const runningIndex = stories.findIndex((s) => s.status === 'running')
@@ -33,6 +49,7 @@ function App() {
   }
 
   const handleStart = () => {
+    setLoopStartTime(Date.now())
     startLoop()
   }
 
@@ -58,8 +75,17 @@ function App() {
         </p>
 
         <section className="mt-6">
+          <h2 className="text-sm font-medium text-white/70 mb-3">Progress</h2>
+          <ProgressSummary
+            stories={stories}
+            status={loopStatus}
+            startTime={loopStartTime}
+          />
+        </section>
+
+        <section className="mt-6">
           <h2 className="text-sm font-medium text-white/70 mb-3">Stories</h2>
-          <StoryList />
+          <StoryList stories={stories} />
         </section>
 
         <section className="mt-6">

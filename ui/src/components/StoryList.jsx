@@ -23,6 +23,19 @@ const statusConfig = {
   },
 }
 
+// Format duration in seconds to human-readable string
+function formatDuration(seconds) {
+  if (!seconds) return null
+
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+
+  if (mins === 0) {
+    return `${secs}s`
+  }
+  return `${mins}m ${secs}s`
+}
+
 function StatusDot({ status }) {
   const config = statusConfig[status] || statusConfig.pending
 
@@ -48,11 +61,13 @@ function PriorityBadge({ priority }) {
 
 function StoryItem({ story }) {
   const isPassed = story.status === 'passed'
+  const isCompleted = story.status === 'passed' || story.status === 'failed'
+  const duration = formatDuration(story.duration)
 
   return (
     <div
       className={`
-        flex items-center gap-3 px-3 py-2 rounded-md
+        group relative flex items-center gap-3 px-3 py-2 rounded-md
         hover:bg-white/5 transition-colors
         ${isPassed ? 'opacity-60' : ''}
       `}
@@ -65,6 +80,20 @@ function StoryItem({ story }) {
         {story.title}
       </span>
       <PriorityBadge priority={story.priority} />
+
+      {/* Duration tooltip on hover for completed stories */}
+      {isCompleted && duration && (
+        <span
+          className="
+            absolute right-0 top-1/2 -translate-y-1/2 mr-14
+            px-2 py-1 text-xs font-mono text-white/80 bg-zinc-800 rounded
+            opacity-0 group-hover:opacity-100 transition-opacity
+            pointer-events-none whitespace-nowrap
+          "
+        >
+          {duration}
+        </span>
+      )}
     </div>
   )
 }
