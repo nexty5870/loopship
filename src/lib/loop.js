@@ -19,11 +19,24 @@ function buildStoryPrompt(prd, story, context = {}) {
 ## Browser Verification Required
 
 This story requires visual verification. After implementing:
-1. Start the dev server if not running
-2. Navigate to: ${story.verifyUrl || "/"}
-3. Take a screenshot using the browser tool
-4. Verify the UI matches the acceptance criteria
-5. Only mark as done after visual confirmation
+
+1. **Start the dev server** (if not already running):
+   \`\`\`bash
+   npm run dev &
+   # Wait for it to be ready
+   sleep 3
+   \`\`\`
+
+2. **Use the browser skill to verify:**
+   \`\`\`bash
+   npx tsx ~/.claude/skills/browser/cli.ts navigate ${story.verifyUrl || "http://localhost:5173"}
+   npx tsx ~/.claude/skills/browser/cli.ts screenshot story-${story.id}.png
+   \`\`\`
+
+3. **Check the screenshot** and verify the UI matches these acceptance criteria
+4. **Only mark as done** after visual confirmation passes
+
+Do NOT mark requiresBrowser stories as passing without actually taking and reviewing a screenshot.
 `
     : "";
 

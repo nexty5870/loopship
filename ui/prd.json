@@ -1,0 +1,139 @@
+{
+  "project": "loopship-ui",
+  "branchName": "feat/ui",
+  "description": "Premium dark UI for LoopShip - monitor and control the Ralph loop in real-time",
+  "stories": [
+    {
+      "id": "1",
+      "title": "Project scaffold with Vite + React + Tailwind",
+      "description": "Initialize a minimal Vite project with React and Tailwind CSS. Configure Tailwind with a restrained dark palette: near-black background (#0a0a0a), zinc grays for surfaces, single accent color (amber-500). Use Inter for UI text and Geist Mono for code. No extra dependencies yet.",
+      "priority": 1,
+      "acceptance": [
+        "npm run dev starts Vite dev server on port 5173",
+        "Tailwind configured with custom dark palette in tailwind.config.js",
+        "Base App.jsx renders a centered 'LoopShip' title on dark background",
+        "Fonts loaded: Inter (sans) and Geist Mono (mono)"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    },
+    {
+      "id": "2",
+      "title": "Layout shell with sidebar and main panel",
+      "description": "Create the main layout: fixed left sidebar (240px) with logo and nav, main content area. Sidebar has subtle border, not heavy. Main area will hold the story list and output panel. Keep it minimal - no icons yet, just text labels.",
+      "priority": 2,
+      "acceptance": [
+        "Sidebar fixed on left with LoopShip logo/text at top",
+        "Navigation items: Dashboard, History (can be placeholder links)",
+        "Main content area takes remaining width",
+        "Clean visual separation between sidebar and main",
+        "Responsive: sidebar collapses on mobile (< 768px)"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    },
+    {
+      "id": "3",
+      "title": "Story list component with status indicators",
+      "description": "Create a StoryList component that displays stories from a mock prd.json. Each story shows: status icon (pending/running/passed/failed/blocked), ID, title, and priority badge. Use subtle colors: zinc for pending, amber for running, green for passed, red for failed. No heavy borders or cards.",
+      "priority": 3,
+      "acceptance": [
+        "StoryList component renders list of stories",
+        "Each story shows status, ID, title, priority",
+        "Status indicated by small colored dot or subtle icon",
+        "Currently running story has subtle pulse animation",
+        "Passed stories slightly muted (opacity)",
+        "Mock data: 5 stories with mixed statuses for testing"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    },
+    {
+      "id": "4",
+      "title": "Output panel with monospace log",
+      "description": "Create an OutputPanel component that shows the agent's live output. Monospace font (Geist Mono), auto-scroll to bottom, subtle syntax highlighting for common patterns (file paths, success/error messages). Panel should be resizable or have a good default height.",
+      "priority": 4,
+      "acceptance": [
+        "OutputPanel component with dark code-block style background",
+        "Monospace font for all text",
+        "Auto-scrolls to bottom as new lines added",
+        "Basic highlighting: green for success markers, red for errors, cyan for file paths",
+        "Mock output data for testing",
+        "Clear button to reset output"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    },
+    {
+      "id": "5",
+      "title": "Control bar with Start/Stop buttons",
+      "description": "Add a control bar above the main content with loop controls. Start button (amber accent when idle), Stop button (appears when running). Show current status: Idle, Running (with story count), Complete. Clean button styling - not chunky.",
+      "priority": 5,
+      "acceptance": [
+        "Control bar fixed at top of main content area",
+        "Start button prominent when idle",
+        "Stop button appears when running (replaces Start)",
+        "Status indicator shows: Idle / Running Story 3/8 / Complete",
+        "Buttons have hover/active states",
+        "Keyboard shortcut hint: Cmd+Enter to start"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    },
+    {
+      "id": "6",
+      "title": "WebSocket client for live updates",
+      "description": "Add a WebSocket client hook (useLoopSocket) that connects to ws://localhost:3099. Handle events: story_start, story_end, output, loop_complete, error. Update UI state accordingly. Include reconnection logic with exponential backoff. For now, mock the server - just implement the client structure.",
+      "priority": 6,
+      "acceptance": [
+        "useLoopSocket hook manages WebSocket connection",
+        "Handles connect/disconnect/reconnect gracefully",
+        "Parses incoming JSON messages by event type",
+        "Exposes: connected, stories, output, status",
+        "Reconnects on disconnect with backoff",
+        "Connection status shown in UI (small indicator in sidebar)"
+      ],
+      "requiresBrowser": false,
+      "verifyUrl": null,
+      "passes": false
+    },
+    {
+      "id": "7",
+      "title": "Progress summary and timing",
+      "description": "Add a progress section showing: stories completed/total, elapsed time, estimated remaining. Use a subtle progress bar (not chunky). Show timing per story in the story list on hover.",
+      "priority": 7,
+      "acceptance": [
+        "Progress bar shows completion (e.g., 3/8 stories)",
+        "Elapsed time displayed (format: 2m 34s)",
+        "Stories show duration on hover (if completed)",
+        "Progress bar uses accent color, subtle height (4px)",
+        "Updates in real-time during loop"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    },
+    {
+      "id": "8",
+      "title": "Polish: transitions, micro-interactions, empty states",
+      "description": "Final polish pass. Add smooth transitions when stories change status. Empty state for output panel before loop starts. Subtle hover effects on interactive elements. Ensure consistent spacing using Tailwind's spacing scale. Remove any placeholder/mock data references from UI text.",
+      "priority": 8,
+      "acceptance": [
+        "Status changes have smooth transitions (150-200ms)",
+        "Empty states with helpful text (no output yet, etc.)",
+        "Consistent spacing throughout (no visual jank)",
+        "All hover states feel responsive",
+        "No lorem ipsum or 'TODO' text visible",
+        "Overall feel: premium, minimal, professional"
+      ],
+      "requiresBrowser": true,
+      "verifyUrl": "http://localhost:5173",
+      "passes": false
+    }
+  ]
+}

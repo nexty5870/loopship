@@ -1,0 +1,17 @@
+# Progress Log
+
+Project: loopship-ui
+Started: 2026-01-07
+Goal: Premium dark UI for LoopShip loop monitoring
+
+## Design Decisions
+
+- Near-black background (#0a0a0a) not dark gray
+- Amber-500 as only accent color
+- Inter + Geist Mono fonts
+- Minimal, no decorative elements
+- Think: Linear, Raycast, Vercel dashboard
+
+## Learnings
+
+(Will be populated as stories complete)
