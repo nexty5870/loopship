@@ -14,4 +14,9 @@ Goal: Premium dark UI for LoopShip loop monitoring
 
 ## Learnings
 
-(Will be populated as stories complete)
+### Story 1: Project scaffold with Vite + React + Tailwind
+- Vite 7.x with @tailwindcss/vite plugin is the modern way (not PostCSS config)
+- Tailwind 4 uses `@import "tailwindcss"` instead of the old @tailwind directives
+- Google Fonts provides both Inter and Geist Mono
+- Keep the base component minimal - just a centered h1 on the dark background
+- Screenshot verified: near-black (#0a0a0a) background with centered "LoopShip" title
