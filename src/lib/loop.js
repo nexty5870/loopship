@@ -148,7 +148,16 @@ export async function runLoop(options) {
     return { success: false, error: "Agent not available" };
   }
 
-  reporter.start({ agent, maxIterations });
+  // Load initial PRD for reporter
+  let initialPrd;
+  try {
+    initialPrd = await loadPrd(cwd);
+  } catch (err) {
+    reporter.error(`Failed to load prd.json: ${err.message}`);
+    return { success: false, error: "PRD load failed" };
+  }
+
+  reporter.start({ agent, maxIterations, prd: initialPrd });
 
   let iteration = 0;
   const storyAttempts = {}; // Track attempts per story

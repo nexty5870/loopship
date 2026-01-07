@@ -1,17 +1,13 @@
 /**
  * Reporter - Progress reporting for the loop
- * Handles console output, file logging, and optional webhooks
+ * Handles console output and broadcasts to UI server
  */
-
-import fs from "node:fs/promises";
-import path from "node:path";
 
 export class Reporter {
   constructor(options = {}) {
     this.verbose = options.verbose ?? false;
     this.quiet = options.quiet ?? false;
-    this.logFile = options.logFile ?? null;
-    this.webhook = options.webhook ?? null;
+    this.server = options.server ?? null; // LoopServer instance
     this.startTime = null;
     this.storiesCompleted = 0;
     this.storiesFailed = 0;
@@ -38,7 +34,7 @@ export class Reporter {
   /**
    * Loop started
    */
-  start({ agent, maxIterations }) {
+  start({ agent, maxIterations, prd }) {
     this.startTime = Date.now();
     
     console.log("");
@@ -50,12 +46,19 @@ export class Reporter {
     console.log(`⏱️  Started: ${new Date().toLocaleTimeString()}`);
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("");
+
+    // Notify UI
+    if (this.server && prd) {
+      this.server.loopStart(prd);
+    }
   }
 
   /**
    * Starting a story
    */
-  storyStart(story, { iteration, attempt, remaining }) {
+  storyStart(story, context) {
+    const { iteration, attempt, remaining } = context;
+
     console.log("");
     console.log(`┌─────────────────────────────────────────────────`);
     console.log(`│ 📖 Story ${story.id}: ${story.title}`);
@@ -65,6 +68,11 @@ export class Reporter {
     }
     console.log(`└─────────────────────────────────────────────────`);
     console.log("");
+
+    // Notify UI
+    if (this.server) {
+      this.server.storyStart(story, context);
+    }
   }
 
   /**
@@ -73,6 +81,11 @@ export class Reporter {
   output(text) {
     if (this.verbose) {
       process.stdout.write(text);
+    }
+
+    // Send to UI
+    if (this.server) {
+      this.server.agentOutput(text);
     }
   }
 
@@ -95,6 +108,11 @@ export class Reporter {
     console.log("");
     console.log(`   ✅ Story ${story.id} PASSED (${(duration / 1000).toFixed(1)}s)`);
     console.log("");
+
+    // Notify UI
+    if (this.server) {
+      this.server.storyEnd(story, { passed: true, duration });
+    }
   }
 
   /**
@@ -109,6 +127,11 @@ export class Reporter {
     }
     console.log(`   🔄 Will retry...`);
     console.log("");
+
+    // Notify UI
+    if (this.server) {
+      this.server.storyEnd(story, { passed: false, duration: result.duration });
+    }
   }
 
   /**
@@ -118,6 +141,11 @@ export class Reporter {
     console.log("");
     console.log(`   ⏭️  Skipping story ${story.id}: ${reason}`);
     console.log("");
+
+    // Notify UI
+    if (this.server) {
+      this.server.addOutput(`⏭️ Skipping story ${story.id}: ${reason}`, "warning");
+    }
   }
 
   /**
@@ -127,6 +155,11 @@ export class Reporter {
     console.error("");
     console.error(`❌ Error: ${message}`);
     console.error("");
+
+    // Notify UI
+    if (this.server) {
+      this.server.addOutput(`❌ Error: ${message}`, "error");
+    }
   }
 
   /**
@@ -148,21 +181,16 @@ export class Reporter {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("");
 
-    // Send webhook if configured
-    this.sendWebhook({
-      event: "complete",
-      project: prd.project,
-      storiesCompleted: this.storiesCompleted,
-      duration,
-    });
+    // Notify UI
+    if (this.server) {
+      this.server.loopComplete({ success: true });
+    }
   }
 
   /**
    * Max iterations reached
    */
   maxIterationsReached(max) {
-    const duration = Date.now() - this.startTime;
-
     console.log("");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("⚠️  MAX ITERATIONS REACHED");
@@ -176,31 +204,9 @@ export class Reporter {
     console.log("   Check progress.txt for details.");
     console.log("");
 
-    this.sendWebhook({
-      event: "max_iterations",
-      storiesCompleted: this.storiesCompleted,
-      storiesFailed: this.storiesFailed,
-      duration,
-    });
-  }
-
-  /**
-   * Send webhook notification (if configured)
-   */
-  async sendWebhook(data) {
-    if (!this.webhook) return;
-
-    try {
-      await fetch(this.webhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-    } catch (err) {
-      // Silently fail - webhooks are optional
+    // Notify UI
+    if (this.server) {
+      this.server.loopComplete({ success: false });
     }
   }
 }

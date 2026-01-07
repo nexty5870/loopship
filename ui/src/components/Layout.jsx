@@ -4,11 +4,13 @@ function ConnectionIndicator({ connected }) {
   return (
     <div className="flex items-center gap-2 px-5 py-3 border-t border-white/10">
       <span
-        className={`w-2 h-2 rounded-full ${
+        className={`w-2 h-2 rounded-full transition-all duration-200 ease-out ${
           connected ? 'bg-green-500' : 'bg-zinc-500'
         }`}
       />
-      <span className="text-xs text-white/50">
+      <span className={`text-xs transition-all duration-200 ease-out ${
+        connected ? 'text-white/60' : 'text-white/40'
+      }`}>
         {connected ? 'Connected' : 'Disconnected'}
       </span>
     </div>
@@ -43,11 +45,11 @@ function Sidebar({ isOpen, onToggle, connected }) {
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3">
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             <li>
               <a
                 href="#"
-                className="block px-3 py-2 text-sm text-white/90 hover:bg-white/5 rounded-md transition-colors"
+                className="block px-3 py-2 text-sm text-white/90 bg-white/5 rounded-md transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
               >
                 Dashboard
               </a>
@@ -55,7 +57,7 @@ function Sidebar({ isOpen, onToggle, connected }) {
             <li>
               <a
                 href="#"
-                className="block px-3 py-2 text-sm text-white/60 hover:text-white/90 hover:bg-white/5 rounded-md transition-colors"
+                className="block px-3 py-2 text-sm text-white/60 hover:text-white/90 hover:bg-white/5 active:bg-white/8 rounded-md transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
               >
                 History
               </a>
@@ -83,7 +85,7 @@ function Layout({ children, connected = false }) {
         <header className="h-14 flex items-center px-4 border-b border-white/10 md:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 -ml-2 text-white/60 hover:text-white/90 transition-colors"
+            className="p-2 -ml-2 text-white/60 hover:text-white/90 hover:bg-white/5 active:bg-white/8 active:scale-[0.98] rounded-md transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
             aria-label="Open menu"
           >
             <svg

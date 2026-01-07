@@ -116,7 +116,7 @@
       ],
       "requiresBrowser": true,
       "verifyUrl": "http://localhost:5173",
-      "passes": false
+      "passes": true
     },
     {
       "id": "8",
@@ -133,7 +133,8 @@
       ],
       "requiresBrowser": true,
       "verifyUrl": "http://localhost:5173",
-      "passes": false
+      "passes": false,
+      "blocked": true
     }
   ]
 }

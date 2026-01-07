@@ -36,6 +36,8 @@ Commands:
     --verbose             Show agent output in real-time
     --dry-run             Show what would happen without executing
     --webhook <url>       Send completion notification to webhook
+    --ui                  Start WebSocket server for UI (ws://localhost:3099)
+    --ui-port <port>      UI server port (default: 3099)
 
   verify [options]
     Run browser verification manually.
@@ -87,6 +89,8 @@ async function main() {
           verbose: { type: "boolean", short: "v", default: false },
           "dry-run": { type: "boolean", default: false },
           webhook: { type: "string" },
+          ui: { type: "boolean", default: false },
+          "ui-port": { type: "string", default: "3099" },
         },
         allowPositionals: true,
       });
@@ -99,6 +103,8 @@ async function main() {
         verbose: values.verbose,
         dryRun: values["dry-run"],
         webhook: values.webhook,
+        ui: values.ui,
+        uiPort: parseInt(values["ui-port"], 10),
       });
       break;
     }

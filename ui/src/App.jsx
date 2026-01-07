@@ -26,8 +26,11 @@ function App() {
 
   // Use live data when connected, fall back to mock data otherwise
   const stories = liveStories.length > 0 ? liveStories : mockStories
-  const outputLines = liveOutput.length > 0 ? liveOutput : mockOutput
   const loopStatus = connected ? liveStatus : 'idle'
+  // Show empty output when idle to display the empty state, otherwise use live/mock output
+  const outputLines = loopStatus === 'idle' && liveOutput.length === 0
+    ? []
+    : (liveOutput.length > 0 ? liveOutput : mockOutput)
 
   // Track loop start time when status changes to running
   useEffect(() => {
@@ -66,16 +69,18 @@ function App() {
         onStart={handleStart}
         onStop={handleStop}
       />
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold text-white">
-          Dashboard
-        </h1>
-        <p className="mt-2 text-white/60 text-sm">
-          Monitor and control the Ralph loop in real-time.
-        </p>
+      <div className="p-6 space-y-6">
+        <header>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">
+            Dashboard
+          </h1>
+          <p className="mt-1.5 text-white/60 text-sm">
+            Monitor and control story implementation in real-time.
+          </p>
+        </header>
 
-        <section className="mt-6">
-          <h2 className="text-sm font-medium text-white/70 mb-3">Progress</h2>
+        <section>
+          <h2 className="text-xs font-medium text-white/50 uppercase tracking-wide mb-3">Progress</h2>
           <ProgressSummary
             stories={stories}
             status={loopStatus}
@@ -83,13 +88,13 @@ function App() {
           />
         </section>
 
-        <section className="mt-6">
-          <h2 className="text-sm font-medium text-white/70 mb-3">Stories</h2>
+        <section>
+          <h2 className="text-xs font-medium text-white/50 uppercase tracking-wide mb-3">Stories</h2>
           <StoryList stories={stories} />
         </section>
 
-        <section className="mt-6">
-          <h2 className="text-sm font-medium text-white/70 mb-3">Agent Output</h2>
+        <section>
+          <h2 className="text-xs font-medium text-white/50 uppercase tracking-wide mb-3">Output</h2>
           <OutputPanel lines={outputLines} onClear={handleClearOutput} />
         </section>
       </div>

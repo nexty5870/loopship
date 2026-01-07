@@ -10,10 +10,19 @@
     "start": "node src/cli.js",
     "test": "node --test test/*.test.js"
   },
-  "keywords": ["ai", "coding", "automation", "ralph", "orchestration"],
+  "keywords": [
+    "ai",
+    "coding",
+    "automation",
+    "ralph",
+    "orchestration"
+  ],
   "author": "Quentin Daems (@ShvZFR)",
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
   }
 }

@@ -68,3 +68,14 @@ Goal: Premium dark UI for LoopShip loop monitoring
 - Added ConnectionIndicator component in Layout.jsx showing green/zinc dot with text
 - Connection indicator placed at bottom of sidebar with subtle border-t separator
 - App.jsx integrates hook and passes connected prop to Layout
+
+### Story 7: Progress summary and timing
+- Created ProgressSummary component showing stories completed/total with percentage
+- Elapsed time updates every second via setInterval when status is 'running'
+- Estimated remaining calculated from average time per completed story
+- Progress bar uses h-1 (4px) with amber-500 fill and white/10 background track
+- StoryItem updated with hover tooltip showing duration for completed stories
+- Tooltip uses group/group-hover pattern with opacity transition
+- Mock data extended with duration field (in seconds) for completed stories
+- Loop start time tracked in App.jsx state and passed to ProgressSummary
+- Screenshot verified: progress bar visible at 60% (3/5 stories), elapsed time shows 0s

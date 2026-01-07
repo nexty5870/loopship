@@ -7,6 +7,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { runLoop } from "../lib/loop.js";
 import { Reporter } from "../lib/reporter.js";
+import { LoopServer } from "../lib/server.js";
 import { isAgentAvailable, AGENTS } from "../lib/agent.js";
 
 export async function run(options) {
@@ -19,6 +20,8 @@ export async function run(options) {
     verbose = false,
     dryRun = false,
     webhook = null,
+    ui = false,
+    uiPort = 3099,
   } = options;
 
   const cwd = process.cwd();
@@ -49,6 +52,7 @@ export async function run(options) {
   console.log(`⏱️  Timeout per story: ${timeout} minutes`);
   console.log(`🌐 Browser verification: ${browser ? "enabled" : "disabled"}`);
   if (verbose) console.log(`📝 Verbose output: enabled`);
+  if (ui) console.log(`🖥️  UI server: ws://localhost:${uiPort}`);
   if (webhook) console.log(`🔔 Webhook: ${webhook}`);
   console.log("");
 
@@ -127,16 +131,41 @@ export async function run(options) {
     return;
   }
 
-  // Create reporter
+  // Start UI server if requested
+  let server = null;
+  if (ui) {
+    server = new LoopServer({ port: uiPort });
+    try {
+      await server.start();
+    } catch (err) {
+      console.error(`❌ Failed to start UI server: ${err.message}`);
+      process.exit(1);
+    }
+  }
+
+  // Create reporter with server
   const reporter = new Reporter({
     verbose,
     webhook,
+    server,
   });
 
   // Run the loop!
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("🔄 Starting loop... (Ctrl+C to stop)");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+  // Handle graceful shutdown
+  const shutdown = async () => {
+    console.log("\n🛑 Shutting down...");
+    if (server) {
+      await server.stop();
+    }
+    process.exit(0);
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 
   try {
     const result = await runLoop({
@@ -147,6 +176,11 @@ export async function run(options) {
       timeout: timeout * 60 * 1000, // Convert to ms
       reporter,
     });
+
+    // Stop server
+    if (server) {
+      await server.stop();
+    }
 
     if (result.success) {
       process.exit(0);
@@ -160,6 +194,12 @@ export async function run(options) {
     if (verbose) {
       console.error(err.stack);
     }
+
+    // Stop server on error
+    if (server) {
+      await server.stop();
+    }
+
     process.exit(1);
   }
 }
