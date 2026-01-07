@@ -20,3 +20,10 @@ Goal: Premium dark UI for LoopShip loop monitoring
 - Google Fonts provides both Inter and Geist Mono
 - Keep the base component minimal - just a centered h1 on the dark background
 - Screenshot verified: near-black (#0a0a0a) background with centered "LoopShip" title
+
+### Story 2: Layout shell with sidebar and main panel
+- Created components directory with Layout.jsx containing both Sidebar and Layout components
+- Sidebar uses w-60 (240px) with subtle border-white/10 separator
+- Mobile responsive: sidebar hidden by default with hamburger menu toggle
+- Used transform/translate for smooth mobile slide-in animation
+- Screenshot verified: sidebar on left with logo, Dashboard/History nav, main content area on right

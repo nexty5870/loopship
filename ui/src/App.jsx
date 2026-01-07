@@ -1,10 +1,17 @@
+import Layout from './components/Layout'
+
 function App() {
   return (
-    <div className="h-full flex items-center justify-center bg-background">
-      <h1 className="text-4xl font-semibold text-white font-sans">
-        LoopShip
-      </h1>
-    </div>
+    <Layout>
+      <div className="p-6">
+        <h1 className="text-2xl font-semibold text-white">
+          Dashboard
+        </h1>
+        <p className="mt-2 text-white/60 text-sm">
+          Monitor and control the Ralph loop in real-time.
+        </p>
+      </div>
+    </Layout>
   )
 }
 
