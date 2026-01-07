@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-const SOCKET_URL = 'ws://localhost:3099'
+// Use same host as page, but port 3099
+const getSocketUrl = () => {
+  const host = window.location.hostname
+  return `ws://${host}:3099`
+}
+
 const INITIAL_RETRY_DELAY = 1000
 const MAX_RETRY_DELAY = 30000
 const BACKOFF_MULTIPLIER = 2
@@ -14,7 +19,7 @@ export function useLoopSocket() {
   const wsRef = useRef(null)
   const retryDelayRef = useRef(INITIAL_RETRY_DELAY)
   const retryTimeoutRef = useRef(null)
-  const mountedRef = useRef(true)
+  const cleaningUpRef = useRef(false) // Track if we're intentionally closing
   const outputIdRef = useRef(1)
 
   // Send message to server
@@ -42,9 +47,11 @@ export function useLoopSocket() {
 
   // Connect on mount, cleanup on unmount
   useEffect(() => {
-    mountedRef.current = true
+    let isMounted = true
+    cleaningUpRef.current = false
 
     const handleStoryStart = (payload) => {
+      if (!isMounted) return
       const { storyId } = payload
       setStatus('running')
       setStories((prev) =>
@@ -57,30 +64,34 @@ export function useLoopSocket() {
     }
 
     const handleStoryEnd = (payload) => {
-      const { storyId, passed } = payload
+      if (!isMounted) return
+      const { storyId, passed, duration } = payload
       setStories((prev) =>
         prev.map((story) =>
           story.id === storyId
-            ? { ...story, status: passed ? 'passed' : 'failed' }
+            ? { ...story, status: passed ? 'passed' : 'failed', duration }
             : story
         )
       )
     }
 
     const handleOutput = (payload) => {
-      const { text, type = 'info' } = payload
+      if (!isMounted) return
+      const { text, type = 'default' } = payload
       setOutput((prev) => [
         ...prev,
         { id: outputIdRef.current++, text, type }
       ])
     }
 
-    const handleLoopComplete = () => {
-      setStatus('complete')
+    const handleLoopComplete = (payload) => {
+      if (!isMounted) return
+      setStatus(payload?.success ? 'complete' : 'stopped')
     }
 
     const handleError = (payload) => {
-      const { message } = payload
+      if (!isMounted) return
+      const message = payload?.message || 'Unknown error'
       setStatus('error')
       setOutput((prev) => [
         ...prev,
@@ -89,6 +100,8 @@ export function useLoopSocket() {
     }
 
     const handleMessage = (data) => {
+      if (!isMounted) return
+      
       try {
         const message = JSON.parse(data)
 
@@ -109,15 +122,12 @@ export function useLoopSocket() {
             handleError(message.payload)
             break
           case 'stories':
-            // Initial stories list from server
-            setStories(message.payload || [])
+            if (isMounted) setStories(message.payload || [])
             break
           case 'status':
-            // Status update from server
-            setStatus(message.payload?.status || 'idle')
+            if (isMounted) setStatus(message.payload?.status || 'idle')
             break
           default:
-            // Unknown message type - ignore
             break
         }
       } catch {
@@ -126,20 +136,19 @@ export function useLoopSocket() {
     }
 
     const scheduleReconnect = () => {
-      if (!mountedRef.current) return
+      // Don't reconnect if we're cleaning up or unmounted
+      if (cleaningUpRef.current || !isMounted) return
 
-      // Clear any pending retry
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current)
       }
 
       retryTimeoutRef.current = setTimeout(() => {
-        if (mountedRef.current) {
+        if (isMounted && !cleaningUpRef.current) {
           connect()
         }
       }, retryDelayRef.current)
 
-      // Exponential backoff
       retryDelayRef.current = Math.min(
         retryDelayRef.current * BACKOFF_MULTIPLIER,
         MAX_RETRY_DELAY
@@ -147,51 +156,73 @@ export function useLoopSocket() {
     }
 
     const connect = () => {
-      if (!mountedRef.current) return
+      if (!isMounted || cleaningUpRef.current) return
 
-      // Clean up any existing connection
+      // Clean up existing connection without triggering reconnect
       if (wsRef.current) {
+        cleaningUpRef.current = true
         wsRef.current.close()
+        cleaningUpRef.current = false
       }
 
       try {
-        const ws = new WebSocket(SOCKET_URL)
+        const url = getSocketUrl()
+        console.log('[WS] Connecting to', url)
+        const ws = new WebSocket(url)
         wsRef.current = ws
 
         ws.onopen = () => {
-          if (!mountedRef.current) return
+          if (!isMounted) {
+            ws.close()
+            return
+          }
+          console.log('[WS] Connected')
           setConnected(true)
           retryDelayRef.current = INITIAL_RETRY_DELAY
         }
 
-        ws.onclose = () => {
-          if (!mountedRef.current) return
+        ws.onclose = (event) => {
+          console.log('[WS] Closed', event.code, cleaningUpRef.current ? '(cleanup)' : '')
+          if (!isMounted) return
           setConnected(false)
-          scheduleReconnect()
+          
+          // Only reconnect if this wasn't an intentional close
+          if (!cleaningUpRef.current) {
+            scheduleReconnect()
+          }
         }
 
-        ws.onerror = () => {
-          // onclose will be called after onerror, so we just let it handle reconnection
+        ws.onerror = (error) => {
+          console.log('[WS] Error', error)
+          // onclose will handle reconnection
         }
 
         ws.onmessage = (event) => {
-          if (!mountedRef.current) return
           handleMessage(event.data)
         }
-      } catch {
+      } catch (err) {
+        console.log('[WS] Connection error', err)
         scheduleReconnect()
       }
     }
 
+    // Initial connection
     connect()
 
+    // Cleanup on unmount
     return () => {
-      mountedRef.current = false
+      console.log('[WS] Cleanup')
+      isMounted = false
+      cleaningUpRef.current = true
+      
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
       }
+      
       if (wsRef.current) {
         wsRef.current.close()
+        wsRef.current = null
       }
     }
   }, [])
