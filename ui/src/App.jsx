@@ -1,4 +1,5 @@
 import Layout from './components/Layout'
+import StoryList from './components/StoryList'
 
 function App() {
   return (
@@ -10,6 +11,11 @@ function App() {
         <p className="mt-2 text-white/60 text-sm">
           Monitor and control the Ralph loop in real-time.
         </p>
+
+        <section className="mt-6">
+          <h2 className="text-sm font-medium text-white/70 mb-3">Stories</h2>
+          <StoryList />
+        </section>
       </div>
     </Layout>
   )

@@ -27,3 +27,12 @@ Goal: Premium dark UI for LoopShip loop monitoring
 - Mobile responsive: sidebar hidden by default with hamburger menu toggle
 - Used transform/translate for smooth mobile slide-in animation
 - Screenshot verified: sidebar on left with logo, Dashboard/History nav, main content area on right
+
+### Story 3: Story list component with status indicators
+- StoryList component with StatusDot, PriorityBadge, and StoryItem sub-components
+- Status colors: zinc-500 (pending), amber-500 (running), green-500 (passed), red-500 (failed), zinc-400 (blocked)
+- Running status uses Tailwind's animate-ping for subtle pulse effect
+- Passed stories use opacity-60 to appear muted
+- Mock data in src/data/mockStories.js with 5 stories in various states
+- Clean list style with hover:bg-white/5 for subtle interactivity
+- Screenshot verified: all status dots visible with correct colors, passed stories dimmed
