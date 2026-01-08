@@ -12,7 +12,20 @@ import { Reporter } from "./reporter.js";
  * Build the prompt for a single story iteration
  */
 function buildStoryPrompt(prd, story, context = {}) {
-  const { progressLog = "", attempt = 1 } = context;
+  const { progressLog = "", attempt = 1, prdMarkdown = null } = context;
+  
+  const prdContext = prdMarkdown
+    ? `
+## Full PRD Context
+
+Read PRD.md for additional context about this project:
+
+\`\`\`markdown
+${prdMarkdown}
+\`\`\`
+
+`
+    : "";
 
   const browserInstructions = story.requiresBrowser
     ? `
@@ -53,6 +66,7 @@ You are implementing a single story from a PRD. Complete this story, then stop.
 **Project:** ${prd.project}
 **Branch:** ${prd.branchName}
 **Description:** ${prd.description}
+${prdContext}
 
 ## Current Story
 
@@ -114,6 +128,21 @@ async function loadPrd(cwd) {
   const prdPath = path.join(cwd, "prd.json");
   const content = await fs.readFile(prdPath, "utf-8");
   return JSON.parse(content);
+}
+
+/**
+ * Load PRD.md if it exists (human-readable context)
+ */
+async function loadPrdMarkdown(cwd) {
+  try {
+    const prdMdPath = path.join(cwd, "PRD.md");
+    const content = await fs.readFile(prdMdPath, "utf-8");
+    // Return first 100 lines for context (avoid huge prompts)
+    const lines = content.split("\n");
+    return lines.slice(0, 100).join("\n") + (lines.length > 100 ? "\n\n[...truncated]" : "");
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -207,6 +236,12 @@ export async function runLoop(options) {
   // Initialize progress file for multi-session continuity
   await initProgressFile(cwd, initialPrd);
 
+  // Load PRD.md if it exists for richer context
+  const prdMarkdown = await loadPrdMarkdown(cwd);
+  if (prdMarkdown) {
+    reporter.log("📄 Found PRD.md - including in agent context");
+  }
+
   reporter.start({ agent, maxIterations, prd: initialPrd });
 
   let iteration = 0;
@@ -262,6 +297,7 @@ export async function runLoop(options) {
     const prompt = buildStoryPrompt(prd, story, {
       progressLog,
       attempt: storyAttempts[storyKey],
+      prdMarkdown,
     });
 
     // Run the agent
