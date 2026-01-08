@@ -131,4 +131,7 @@ Examples NOT requiring browser:
   console.log("   1. Save PRD to PRD.md");
   console.log("   2. Save tasks JSON to prd.json");
   console.log("   3. Run: loopship run");
+  console.log("");
+  console.log("📝 LoopShip will create loopship-progress.md automatically");
+  console.log("   This file persists progress across sessions.");
 }
