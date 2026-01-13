@@ -78,19 +78,12 @@ Options:
 
 ### 3. Watch progress (optional)
 
-Start the UI:
-```bash
-cd ui
-npm install
-npm run dev
-```
-
-Then run with `--ui`:
+Run with the `--ui` flag to automatically start the live dashboard:
 ```bash
 loopship run --ui --verbose
 ```
 
-Open http://localhost:5173 to watch stories complete in real-time.
+The UI will automatically start at http://localhost:5173 and connect to the WebSocket server. Watch your stories complete in real-time!
 
 ## 📝 PRD Format
 

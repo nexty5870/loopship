@@ -40,8 +40,8 @@ Commands:
     --verbose             Show agent output in real-time
     --dry-run             Show what would happen without executing
     --webhook <url>       Send completion notification to webhook
-    --ui                  Start WebSocket server for UI (ws://localhost:3099)
-    --ui-port <port>      UI server port (default: 3099)
+    --ui                  Start live UI dashboard (auto-starts Vite + WebSocket)
+    --ui-port <port>      WebSocket server port (default: 3099)
 
   verify [options]
     Run browser verification manually.

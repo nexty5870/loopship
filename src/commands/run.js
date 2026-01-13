@@ -5,10 +5,14 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { runLoop } from "../lib/loop.js";
 import { Reporter } from "../lib/reporter.js";
 import { LoopServer } from "../lib/server.js";
 import { isAgentAvailable, AGENTS } from "../lib/agent.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function run(options) {
   const {
@@ -52,7 +56,7 @@ export async function run(options) {
   console.log(`⏱️  Timeout per story: ${timeout} minutes`);
   console.log(`🌐 Browser verification: ${browser ? "enabled" : "disabled"}`);
   if (verbose) console.log(`📝 Verbose output: enabled`);
-  if (ui) console.log(`🖥️  UI server: ws://localhost:${uiPort}`);
+  if (ui) console.log(`🖥️  Live UI: will start at http://localhost:5173`);
   if (webhook) console.log(`🔔 Webhook: ${webhook}`);
   console.log("");
 
@@ -131,8 +135,9 @@ export async function run(options) {
     return;
   }
 
-  // Start UI server if requested
+  // Start UI server and Vite dev server if requested
   let server = null;
+  let viteProcess = null;
   if (ui) {
     server = new LoopServer({ port: uiPort });
     try {
@@ -140,6 +145,12 @@ export async function run(options) {
     } catch (err) {
       console.error(`❌ Failed to start UI server: ${err.message}`);
       process.exit(1);
+    }
+
+    // Start Vite dev server
+    viteProcess = await startViteDevServer();
+    if (!viteProcess) {
+      console.error("⚠️  Failed to start Vite dev server, but continuing...");
     }
   }
 
@@ -161,6 +172,9 @@ export async function run(options) {
     if (server) {
       await server.stop();
     }
+    if (viteProcess) {
+      viteProcess.kill();
+    }
     process.exit(0);
   };
 
@@ -177,9 +191,12 @@ export async function run(options) {
       reporter,
     });
 
-    // Stop server
+    // Stop server and Vite
     if (server) {
       await server.stop();
+    }
+    if (viteProcess) {
+      viteProcess.kill();
     }
 
     if (result.success) {
@@ -195,11 +212,73 @@ export async function run(options) {
       console.error(err.stack);
     }
 
-    // Stop server on error
+    // Stop server and Vite on error
     if (server) {
       await server.stop();
+    }
+    if (viteProcess) {
+      viteProcess.kill();
     }
 
     process.exit(1);
   }
+}
+
+/**
+ * Start the Vite dev server for the UI
+ * @returns {Promise<ChildProcess|null>} The Vite process or null if failed
+ */
+async function startViteDevServer() {
+  const uiDir = path.join(__dirname, "../../ui");
+
+  // Check if UI directory exists
+  try {
+    await fs.access(uiDir);
+  } catch (err) {
+    console.error("⚠️  UI directory not found, skipping Vite dev server");
+    return null;
+  }
+
+  // Check if node_modules exists in UI directory
+  const nodeModulesPath = path.join(uiDir, "node_modules");
+  try {
+    await fs.access(nodeModulesPath);
+  } catch (err) {
+    console.log("📦 Installing UI dependencies...");
+    // Run npm install
+    const installProc = spawn("npm", ["install"], {
+      cwd: uiDir,
+      stdio: "inherit",
+    });
+
+    await new Promise((resolve, reject) => {
+      installProc.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`npm install failed with code ${code}`));
+      });
+      installProc.on("error", reject);
+    });
+  }
+
+  // Start Vite dev server
+  console.log("🌐 Starting UI dev server...");
+  const viteProc = spawn("npm", ["run", "dev"], {
+    cwd: uiDir,
+    stdio: "pipe", // Capture output to avoid cluttering the terminal
+    env: { ...process.env, FORCE_COLOR: "0" },
+  });
+
+  // Wait a bit for Vite to start
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // Check if process is still running
+  if (viteProc.exitCode !== null) {
+    console.error("⚠️  Vite dev server exited unexpectedly");
+    return null;
+  }
+
+  console.log("✅ UI available at http://localhost:5173");
+  console.log("");
+
+  return viteProc;
 }
