@@ -12,14 +12,33 @@ const TOOLS_DIR = path.join(__dirname, "../../tools/ai-dev-tasks");
 
 export async function init(description) {
   if (!description?.trim()) {
-    console.error("❌ Please provide a feature description");
+    console.error("❌ Please provide a feature description or .md file path");
     console.error("   Usage: loopship init \"Add user authentication with OAuth\"");
+    console.error("          loopship init ./my-prd.md");
     process.exit(1);
+  }
+
+  // Check if argument is a .md file path
+  let featureDescription = description;
+  let sourceFile = null;
+
+  if (description.trim().endsWith(".md")) {
+    const filePath = path.resolve(process.cwd(), description.trim());
+    try {
+      featureDescription = await fs.readFile(filePath, "utf-8");
+      sourceFile = filePath;
+    } catch (err) {
+      // File doesn't exist, treat as regular description
+    }
   }
 
   console.log("🚀 LoopShip Init");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`📝 Feature: ${description}`);
+  if (sourceFile) {
+    console.log(`📝 Feature from: ${sourceFile}`);
+  } else {
+    console.log(`📝 Feature: ${featureDescription}`);
+  }
   console.log("");
 
   // Load the PRD creation prompt
@@ -41,7 +60,7 @@ export async function init(description) {
   const fullPrompt = `
 # Feature Request
 
-${description}
+${featureDescription}
 
 ---
 
