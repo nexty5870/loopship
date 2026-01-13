@@ -34,7 +34,7 @@ All autonomous. Zero hand-holding.
 git clone https://github.com/nexty5870/loopship.git
 cd loopship
 
-# Install dependencies
+# Install dependencies (automatically sets up ai-dev-tasks prompts)
 npm install
 
 # Make CLI available
@@ -44,6 +44,8 @@ npm link
 **Requirements:**
 - Node.js 20+
 - Claude Code (`npm install -g @anthropic-ai/claude-code`) or Codex
+
+The `npm install` command automatically clones the required ai-dev-tasks prompts. No manual setup needed!
 
 ## 🚀 Quick Start
 

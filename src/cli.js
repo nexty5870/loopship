@@ -22,7 +22,11 @@ Usage:
 Commands:
   init <description>
     Generate a PRD and task list from a natural language description.
+    If you provide a PRD.md file, it will automatically generate prd.json.
     Uses ai-dev-tasks prompts under the hood.
+
+    --agent <name>        Agent to use: claude, codex (default: claude)
+    --manual              Skip auto-generation, create prompt file only
 
   run [options]
     Start the autonomous coding loop. The agent will implement stories
@@ -73,9 +77,21 @@ const args = process.argv.slice(3);
 
 async function main() {
   switch (command) {
-    case "init":
-      await init(args.join(" "));
+    case "init": {
+      const { values, positionals } = parseArgs({
+        args,
+        options: {
+          agent: { type: "string", default: "claude" },
+          manual: { type: "boolean", default: false },
+        },
+        allowPositionals: true,
+      });
+      await init(positionals.join(" "), {
+        agent: values.agent,
+        manual: values.manual,
+      });
       break;
+    }
 
     case "run": {
       const { values } = parseArgs({
