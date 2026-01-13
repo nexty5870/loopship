@@ -12,7 +12,20 @@ import { Reporter } from "./reporter.js";
  * Build the prompt for a single story iteration
  */
 function buildStoryPrompt(prd, story, context = {}) {
-  const { progressLog = "", attempt = 1 } = context;
+  const { progressLog = "", attempt = 1, prdMarkdown = null } = context;
+  
+  const prdContext = prdMarkdown
+    ? `
+## Full PRD Context
+
+Read PRD.md for additional context about this project:
+
+\`\`\`markdown
+${prdMarkdown}
+\`\`\`
+
+`
+    : "";
 
   const browserInstructions = story.requiresBrowser
     ? `
@@ -41,7 +54,7 @@ Do NOT mark requiresBrowser stories as passing without actually taking and revie
     : "";
 
   const retryContext = attempt > 1
-    ? `\n## Retry Attempt ${attempt}\n\nPrevious attempt failed. Check progress.txt for error details.\n`
+    ? `\n## Retry Attempt ${attempt}\n\nPrevious attempt failed. Check loopship-progress.md for error details and learnings from the failed attempt.\n`
     : "";
 
   return `# LoopShip - Story Implementation
@@ -53,6 +66,7 @@ You are implementing a single story from a PRD. Complete this story, then stop.
 **Project:** ${prd.project}
 **Branch:** ${prd.branchName}
 **Description:** ${prd.description}
+${prdContext}
 
 ## Current Story
 
@@ -75,21 +89,31 @@ ${retryContext}
    - Run \`npm run typecheck\` if TypeScript
    ${story.requiresBrowser ? "- Take browser screenshot and verify UI" : ""}
 3. **If successful:**
-   - Commit with message: \`feat: ${story.title}\`
+   - Commit with message: \`feat(story-${story.id}): ${story.title.toLowerCase().replace(/[^a-z0-9 ]/g, '').substring(0, 50)}\`
    - Update prd.json: set story ${story.id} \`passes: true\`
-   - Add a brief note to progress.txt about what you learned
+   - Update loopship-progress.md with:
+     - ✅ Story ${story.id} completed
+     - What you implemented
+     - Any learnings or gotchas for future sessions
 4. **If it fails:**
-   - Add error details to progress.txt
+   - Update loopship-progress.md with:
+     - ❌ Story ${story.id} failed (attempt ${context.attempt || 1})
+     - What went wrong
+     - What needs fixing
    - Do NOT set passes: true
 
 ## Files to Update
 
 - **prd.json** - Mark story as passing when done
-- **progress.txt** - Log what you did and any learnings
+- **loopship-progress.md** - Log progress, learnings, and blockers (this persists across sessions!)
 
-## Recent Progress
+## Session Continuity
 
-${progressLog || "(No progress yet)"}
+**Read loopship-progress.md first** - it contains progress from previous sessions, learnings, and any blockers.
+
+### Recent Progress (last 80 lines)
+
+${progressLog || "(No progress yet - this is the first run)"}
 
 ---
 
@@ -107,17 +131,69 @@ async function loadPrd(cwd) {
 }
 
 /**
- * Load progress log
+ * Load PRD.md if it exists (human-readable context)
+ */
+async function loadPrdMarkdown(cwd) {
+  try {
+    const prdMdPath = path.join(cwd, "PRD.md");
+    const content = await fs.readFile(prdMdPath, "utf-8");
+    // Return first 100 lines for context (avoid huge prompts)
+    const lines = content.split("\n");
+    return lines.slice(0, 100).join("\n") + (lines.length > 100 ? "\n\n[...truncated]" : "");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Load progress log from loopship-progress.md
  */
 async function loadProgress(cwd) {
   try {
-    const progressPath = path.join(cwd, "progress.txt");
+    const progressPath = path.join(cwd, "loopship-progress.md");
     const content = await fs.readFile(progressPath, "utf-8");
-    // Return last 50 lines for context
+    // Return last 80 lines for context
     const lines = content.split("\n");
-    return lines.slice(-50).join("\n");
+    return lines.slice(-80).join("\n");
   } catch {
     return "";
+  }
+}
+
+/**
+ * Initialize or update loopship-progress.md
+ */
+async function initProgressFile(cwd, prd) {
+  const progressPath = path.join(cwd, "loopship-progress.md");
+  
+  try {
+    // Check if file exists
+    await fs.access(progressPath);
+    // File exists, append session marker
+    const sessionMarker = `\n---\n\n## Session ${new Date().toISOString()}\n\n`;
+    await fs.appendFile(progressPath, sessionMarker);
+  } catch {
+    // Create new file
+    const initial = `# LoopShip Progress Log
+
+**Project:** ${prd.project}
+**Started:** ${new Date().toISOString()}
+**Branch:** ${prd.branchName}
+
+## Overview
+
+${prd.description}
+
+## Stories
+
+${prd.stories.map(s => `- [ ] Story ${s.id}: ${s.title}`).join('\n')}
+
+---
+
+## Session ${new Date().toISOString()}
+
+`;
+    await fs.writeFile(progressPath, initial);
   }
 }
 
@@ -155,6 +231,15 @@ export async function runLoop(options) {
   } catch (err) {
     reporter.error(`Failed to load prd.json: ${err.message}`);
     return { success: false, error: "PRD load failed" };
+  }
+
+  // Initialize progress file for multi-session continuity
+  await initProgressFile(cwd, initialPrd);
+
+  // Load PRD.md if it exists for richer context
+  const prdMarkdown = await loadPrdMarkdown(cwd);
+  if (prdMarkdown) {
+    reporter.log("📄 Found PRD.md - including in agent context");
   }
 
   reporter.start({ agent, maxIterations, prd: initialPrd });
@@ -212,6 +297,7 @@ export async function runLoop(options) {
     const prompt = buildStoryPrompt(prd, story, {
       progressLog,
       attempt: storyAttempts[storyKey],
+      prdMarkdown,
     });
 
     // Run the agent
